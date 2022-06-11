@@ -87,6 +87,15 @@ typedef NS_ENUM(NSUInteger, FFPopupMaskType) {
     FFPopupMaskType_Dimmed NS_SWIFT_NAME(dimmed)
 } NS_SWIFT_NAME(FFPopup.MaskType);
 
+/**
+ FFPopupLevel
+ */
+typedef NS_ENUM(NSUInteger, FFPopupLevel) {
+    FFPopupLevel_Normal NS_SWIFT_NAME(normal),
+    FFPopupMaskType_Alert NS_SWIFT_NAME(alert),
+    FFPopupMaskType_Window NS_SWIFT_NAME(window)
+} NS_SWIFT_NAME(FFPopup.Level);
+
 /** FFPopupLayout */
 struct FFPopupLayout {
     FFPopupHorizontalLayout horizontal;
@@ -133,6 +142,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) FFPopupMaskType maskType;
 
 /**
+ popup level
+
+ @discussion The default value is `Normal`.
+ */
+@property (nonatomic, assign) FFPopupLevel level;
+
+/**
  Overrides alpha value for dimmed mask.
  
  @discussion The default value is `0.5`.
@@ -152,6 +168,13 @@ NS_ASSUME_NONNULL_BEGIN
  @discussion The default value is `0.15`.
  */
 @property (nonatomic, assign) CGFloat dismissOutDuration;
+
+/**
+The content offset.
+
+@discussion The default value is `CGPointZero`.
+*/
+@property (nonatomic, assign) CGPoint contentOffSet;
 
 /**
  If `YES`, the popup will dismiss when background is touched.
@@ -219,6 +242,11 @@ NS_ASSUME_NONNULL_BEGIN
  Dismiss all the popups in the app.
  */
 + (void)dismissAllPopups NS_SWIFT_NAME(dismissAll());
+
+/**
+ Dismiss all the popups in the app.
+ */
++ (void)dismissAllPopupsForLevels:(NSUInteger)levels NS_SWIFT_NAME(dismissAllPopups(levels:));
 
 /**
  Dismiss the popup for contentView.

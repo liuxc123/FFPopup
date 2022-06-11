@@ -83,7 +83,9 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
         self.showType = FFPopupShowType_BounceInFromTop;
         self.dismissType = FFPopupDismissType_BounceOutToBottom;
         self.maskType = FFPopupMaskType_Dimmed;
+        self.level = FFPopupLevel_Normal;
         self.dimmedMaskAlpha = 0.5;
+        self.contentOffSet = CGPointZero;
         
         _isBeingShown = NO;
         _isShowing = NO;
@@ -144,6 +146,15 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
     for (UIWindow *window in windows) {
         [window containsPopupBlock:^(FFPopup * _Nonnull popup) {
             [popup dismissAnimated:NO];
+        }];
+    }
+}
+
++ (void)dismissAllPopupsForLevels:(NSUInteger)levels {
+    NSArray *windows = [[UIApplication sharedApplication] windows];
+    for (UIWindow *window in windows) {
+        [window containsPopupBlock:^(FFPopup * _Nonnull popup) {
+            if (levels & popup.level) { [popup dismissAnimated:NO]; }
         }];
     }
 }
@@ -314,23 +325,23 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
                 /// Layout of the horizontal.
                 switch (layout.horizontal) {
                     case FFPopupHorizontalLayout_Left:
-                        finalContainerFrame.origin.x = 0.0;
+                        finalContainerFrame.origin.x = 0.0 + self.contentOffSet.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     case FFPopupHorizontalLayout_Right:
-                        finalContainerFrame.origin.x = CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame);
+                        finalContainerFrame.origin.x = CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame) + self.contentOffSet.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
                         break;
                     case FFPopupHorizontalLayout_LeftOfCenter:
-                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) / 3.0 - CGRectGetWidth(containerFrame) * 0.5);
+                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) / 3.0 - CGRectGetWidth(containerFrame) * 0.5) + self.contentOffSet.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     case FFPopupHorizontalLayout_RightOfCenter:
-                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) * 2.0 / 3.0 - CGRectGetWidth(containerFrame) * 0.5);
+                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) * 2.0 / 3.0 - CGRectGetWidth(containerFrame) * 0.5) + self.contentOffSet.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     case FFPopupHorizontalLayout_Center:
-                        finalContainerFrame.origin.x = floorf((CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame)) * 0.5);
+                        finalContainerFrame.origin.x = floorf((CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame)) * 0.5) + self.contentOffSet.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     default:
@@ -340,23 +351,23 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
                 /// Layout of the vertical.
                 switch (layout.vertical) {
                     case FFPopupVerticalLayout_Top:
-                        finalContainerFrame.origin.y = 0.0;
+                        finalContainerFrame.origin.y = 0.0 + self.contentOffSet.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_AboveCenter:
-                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) / 3.0 - CGRectGetHeight(containerFrame) * 0.5);
+                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) / 3.0 - CGRectGetHeight(containerFrame) * 0.5) + self.contentOffSet.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_Center:
-                        finalContainerFrame.origin.y = floorf((CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame)) * 0.5);
+                        finalContainerFrame.origin.y = floorf((CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame)) * 0.5) + self.contentOffSet.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_BelowCenter:
-                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) * 2.0 / 3.0 - CGRectGetHeight(containerFrame) * 0.5);
+                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) * 2.0 / 3.0 - CGRectGetHeight(containerFrame) * 0.5) + self.contentOffSet.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_Bottom:
-                        finalContainerFrame.origin.y = CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame);
+                        finalContainerFrame.origin.y = CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame) + self.contentOffSet.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin;
                         break;
                     default:

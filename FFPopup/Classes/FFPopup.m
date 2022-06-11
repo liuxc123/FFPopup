@@ -54,6 +54,11 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
 @property (nonatomic, assign) BOOL isShowing;
 @property (nonatomic, assign) BOOL isBeingShown;
 @property (nonatomic, assign) BOOL isBeingDismissed;
+@property (nonatomic, assign) BOOL isDirectionalVertical;
+@property (nonatomic, assign) BOOL isDirectionLocked;
+
+@property (nonatomic, assign) BOOL isKeyboardVisible;
+@property (nonatomic, assign) CGRect finalContainerFrame;
 
 @end
 
@@ -85,12 +90,18 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
         self.maskType = FFPopupMaskType_Dimmed;
         self.level = FFPopupLevel_Normal;
         self.dimmedMaskAlpha = 0.5;
-        self.contentOffSet = CGPointZero;
+        
+        self.contentOffset = CGPointZero;
+        self.keyboardOffsetSpacing = 0.0;
+        self.shouldKeyboardChangeFollowed = NO;
         
         _isBeingShown = NO;
         _isShowing = NO;
         _isBeingDismissed = NO;
-        
+        _isDirectionalVertical = NO;
+        _isDirectionLocked = NO;
+        _isKeyboardVisible = NO;
+
         [self addSubview:self.backgroundView];
         [self addSubview:self.containerView];
         
@@ -325,23 +336,23 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
                 /// Layout of the horizontal.
                 switch (layout.horizontal) {
                     case FFPopupHorizontalLayout_Left:
-                        finalContainerFrame.origin.x = 0.0 + self.contentOffSet.x;
+                        finalContainerFrame.origin.x = 0.0 + self.contentOffset.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     case FFPopupHorizontalLayout_Right:
-                        finalContainerFrame.origin.x = CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame) + self.contentOffSet.x;
+                        finalContainerFrame.origin.x = CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame) + self.contentOffset.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin;
                         break;
                     case FFPopupHorizontalLayout_LeftOfCenter:
-                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) / 3.0 - CGRectGetWidth(containerFrame) * 0.5) + self.contentOffSet.x;
+                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) / 3.0 - CGRectGetWidth(containerFrame) * 0.5) + self.contentOffset.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     case FFPopupHorizontalLayout_RightOfCenter:
-                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) * 2.0 / 3.0 - CGRectGetWidth(containerFrame) * 0.5) + self.contentOffSet.x;
+                        finalContainerFrame.origin.x = floorf(CGRectGetWidth(strongSelf.bounds) * 2.0 / 3.0 - CGRectGetWidth(containerFrame) * 0.5) + self.contentOffset.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     case FFPopupHorizontalLayout_Center:
-                        finalContainerFrame.origin.x = floorf((CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame)) * 0.5) + self.contentOffSet.x;
+                        finalContainerFrame.origin.x = floorf((CGRectGetWidth(strongSelf.bounds) - CGRectGetWidth(containerFrame)) * 0.5) + self.contentOffset.x;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
                         break;
                     default:
@@ -351,23 +362,23 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
                 /// Layout of the vertical.
                 switch (layout.vertical) {
                     case FFPopupVerticalLayout_Top:
-                        finalContainerFrame.origin.y = 0.0 + self.contentOffSet.y;
+                        finalContainerFrame.origin.y = 0.0 + self.contentOffset.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_AboveCenter:
-                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) / 3.0 - CGRectGetHeight(containerFrame) * 0.5) + self.contentOffSet.y;
+                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) / 3.0 - CGRectGetHeight(containerFrame) * 0.5) + self.contentOffset.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_Center:
-                        finalContainerFrame.origin.y = floorf((CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame)) * 0.5) + self.contentOffSet.y;
+                        finalContainerFrame.origin.y = floorf((CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame)) * 0.5) + self.contentOffset.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_BelowCenter:
-                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) * 2.0 / 3.0 - CGRectGetHeight(containerFrame) * 0.5) + self.contentOffSet.y;
+                        finalContainerFrame.origin.y = floorf(CGRectGetHeight(self.bounds) * 2.0 / 3.0 - CGRectGetHeight(containerFrame) * 0.5) + self.contentOffset.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                         break;
                     case FFPopupVerticalLayout_Bottom:
-                        finalContainerFrame.origin.y = CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame) + self.contentOffSet.y;
+                        finalContainerFrame.origin.y = CGRectGetHeight(self.bounds) - CGRectGetHeight(containerFrame) + self.contentOffset.y;
                         containerAutoresizingMask = containerAutoresizingMask | UIViewAutoresizingFlexibleTopMargin;
                         break;
                     default:
@@ -375,6 +386,7 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
                 }
             }
             
+            strongSelf.finalContainerFrame = finalContainerFrame;
             strongSelf.containerView.autoresizingMask = containerAutoresizingMask;
             
             /// Animate contentView if needed.
@@ -693,10 +705,70 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
 
 - (void)updateInterfaceOrientation {
     self.frame = self.window.bounds;
+    self.finalContainerFrame = self.containerView.frame;
 }
 
 - (void)dismiss {
     [self dismiss:YES];
+}
+
+- (void)directionalLock:(CGPoint)translation {
+    if (!_isDirectionLocked) {
+        _isDirectionalVertical = ABS(translation.x) < ABS(translation.y);
+        _isDirectionLocked = YES;
+    }
+}
+
+- (void)directionalUnlock {
+    _isDirectionLocked = NO;
+}
+
+- (void)setShouldKeyboardChangeFollowed:(BOOL)shouldKeyboardChangeFollowed {
+    if (shouldKeyboardChangeFollowed) {
+        _shouldKeyboardChangeFollowed = shouldKeyboardChangeFollowed;
+        [self bindKeyboardNotifications];
+    }
+}
+
+- (void)bindKeyboardNotifications {
+    if (self.shouldKeyboardChangeFollowed) {
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+        [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(keyboardWillChangeFrame:) name:UIKeyboardWillChangeFrameNotification object:nil];
+    }
+}
+
+- (void)keyboardWillHide:(NSNotification *)notify {
+    _isKeyboardVisible = NO;
+    if (_isShowing) {
+        NSDictionary *u = notify.userInfo;
+        UIViewAnimationOptions options = [u[UIKeyboardAnimationCurveUserInfoKey] integerValue] << 16;
+        NSTimeInterval duration = [u[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+        [UIView animateWithDuration:duration delay:0 options:options animations:^{
+            self.containerView.frame = self.finalContainerFrame;
+        } completion:NULL];
+    }
+}
+
+- (void)keyboardWillChangeFrame:(NSNotification *)notify {
+    NSDictionary *u = notify.userInfo;
+    CGRect frameBegin = [u[UIKeyboardFrameBeginUserInfoKey] CGRectValue];
+    CGRect frameEnd = [u[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    if (frameBegin.size.height > 0 && ABS(CGRectGetMinY(frameBegin) - CGRectGetMinY(frameEnd))) {
+        CGRect frameConverted = [self convertRect:frameEnd fromView:nil];
+        CGFloat keyboardHeightConverted = self.bounds.size.height - CGRectGetMinY(frameConverted);
+        NSLog(@"%f", keyboardHeightConverted);
+        if (keyboardHeightConverted > 0) {
+            _isKeyboardVisible = YES;
+        
+            CGFloat originY = CGRectGetMaxY(self.containerView.frame) - CGRectGetMinY(frameConverted);
+            CGPoint newCenter = CGPointMake(self.containerView.center.x, self.containerView.center.y - originY - self.keyboardOffsetSpacing);
+            NSTimeInterval duration = [u[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+            UIViewAnimationOptions options = [u[UIKeyboardAnimationCurveUserInfoKey] integerValue] << 16;
+            [UIView animateWithDuration:duration delay:0 options:options animations:^{
+                self.containerView.center = newCenter;
+            } completion:NULL];
+        }
+    }
 }
 
 #pragma mark - Properties
@@ -720,6 +792,8 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
     }
     return _containerView;
 }
+
+
 
 @end
 

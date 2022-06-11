@@ -169,12 +169,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) CGFloat dismissOutDuration;
 
-/**
-The content offset.
 
-@discussion The default value is `CGPointZero`.
-*/
-@property (nonatomic, assign) CGPoint contentOffSet;
 
 /**
  If `YES`, the popup will dismiss when background is touched.
@@ -189,6 +184,27 @@ The content offset.
  @discussion The default value is `NO`.
  */
 @property (nonatomic, assign) BOOL shouldDismissOnContentTouch;
+
+/**
+The content offset.
+
+@discussion The default value is `CGPointZero`.
+*/
+@property (nonatomic, assign) CGPoint contentOffset;
+
+/**
+Adjust the spacing between with the keyboard.
+
+@discussion The default value is `0.0`.
+*/
+@property (nonatomic, assign) CGFloat keyboardOffsetSpacing;
+
+/**
+Will adjust view position when keyboard changes.
+
+@discussion The default value is `NO`.
+*/
+@property (nonatomic, assign) BOOL shouldKeyboardChangeFollowed;
 
 /**
  A block to be executed when showing animation started.

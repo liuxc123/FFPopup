@@ -169,8 +169,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) CGFloat dismissOutDuration;
 
-
-
 /**
  If `YES`, the popup will dismiss when background is touched.
  
@@ -193,6 +191,13 @@ The content offset.
 @property (nonatomic, assign) CGPoint contentOffset;
 
 /**
+Will adjust view position when keyboard changes.
+
+@discussion The default value is `NO`.
+*/
+@property (nonatomic, assign) BOOL shouldKeyboardChangeFollowed;
+
+/**
 Adjust the spacing between with the keyboard.
 
 @discussion The default value is `0.0`.
@@ -200,11 +205,18 @@ Adjust the spacing between with the keyboard.
 @property (nonatomic, assign) CGFloat keyboardOffsetSpacing;
 
 /**
-Will adjust view position when keyboard changes.
+Popup view will allow to drag.
 
 @discussion The default value is `NO`.
 */
-@property (nonatomic, assign) BOOL shouldKeyboardChangeFollowed;
+@property (nonatomic, assign) BOOL shouldDismissOnPanGesture;
+
+/**
+When drag position meets the screen ratio the view will dismiss.
+
+@discussion The default value is `0.5`.
+*/
+@property (nonatomic, assign) CGFloat panDismissRatio;
 
 /**
  A block to be executed when showing animation started.
@@ -305,6 +317,13 @@ Will adjust view position when keyboard changes.
  If view is nil, will use screen base coordinates.
  */
 - (void)showAtCenterPoint:(CGPoint)point inView:(UIView *)view NS_SWIFT_NAME(show(center:inView:));
+
+/**
+Show popup at point in view's coordinate system, content location default `CGPointZero` [0, 0] ~ [1, 1].
+If view is nil, will use screen base coordinates.
+*/
+- (void)showAtPositionPoint:(CGPoint)point location:(CGPoint)location inView:(UIView *)view NS_SWIFT_NAME(show(position:location:inView:));
+
 
 /**
  Show popup at point in view's coordinate system and then dismissed after duration.

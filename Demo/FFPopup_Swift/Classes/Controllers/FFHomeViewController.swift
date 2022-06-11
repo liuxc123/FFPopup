@@ -30,11 +30,11 @@ class FFHomeViewController: UIViewController {
     }
     
     @objc fileprivate func showPopup() {
-        let popup = FFPopup(contentView: self.alertView, showType: .bounceIn, dismissType: .shrinkOut, maskType: .dimmed, dismissOnBackgroundTouch: true, dismissOnContentTouch: false)
-        let layout = FFPopupLayout(horizontal: .center, vertical: .center)
-        popup.shouldKeyboardChangeFollowed = true
+        let popup = FFPopup(contentView: self.alertView, showType: .bounceIn, dismissType: .bounceOut, maskType: .dimmed, dismissOnBackgroundTouch: true, dismissOnContentTouch: false)
+        popup.shouldKeyboardChangeFollowed = false
         popup.keyboardOffsetSpacing = 30
-        popup.show(layout: layout)
+        popup.shouldDismissOnPanGesture = true
+        popup.show(position: view.center, location: CGPoint(x: 0, y: 0), inView: view)
     }
     
     // MARK: Properties
@@ -43,7 +43,7 @@ class FFHomeViewController: UIViewController {
         let h = w * 3 / 4
         let frame = CGRect(x: 0, y: 0, width: w, height: h)
         let view = BLCustomContentView(frame: frame)
-        view.backgroundColor = .purple
+        view.backgroundColor = .yellow
         return view
     }()
     

@@ -14,7 +14,8 @@ static const CGFloat kDefaultAnimateDuration = 0.15;
 static const NSInteger kAnimationOptionCurve = (7 << 16);
 static NSString *const kParametersViewName = @"parameters.view";
 static NSString *const kParametersLayoutName = @"parameters.layout";
-static NSString *const kParametersCenterName = @"parameters.center-point";
+static NSString *const kParametersPositionName = @"parameters.position-point";
+static NSString *const kParametersContentLocationName = @"parameters.content-location";
 static NSString *const kParametersDurationName = @"parameters.duration";
 
 FFPopupLayout FFPopupLayoutMake(FFPopupHorizontalLayout horizontal, FFPopupVerticalLayout vertical) {
@@ -51,14 +52,14 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
 @interface FFPopup ()
 @property (nonatomic, strong) UIView *backgroundView;
 @property (nonatomic, strong) UIView *containerView;
+@property (nonatomic, strong) NSDictionary *showParamters;
+@property (nonatomic, assign) CGRect finalContainerFrame;
 @property (nonatomic, assign) BOOL isShowing;
 @property (nonatomic, assign) BOOL isBeingShown;
 @property (nonatomic, assign) BOOL isBeingDismissed;
-@property (nonatomic, assign) BOOL isDirectionalVertical;
-@property (nonatomic, assign) BOOL isDirectionLocked;
-
 @property (nonatomic, assign) BOOL isKeyboardVisible;
-@property (nonatomic, assign) CGRect finalContainerFrame;
+@property (nonatomic, assign) BOOL isDirectionLocked;
+@property (nonatomic, assign) BOOL isDirectionalVertical;
 
 @end
 
@@ -95,6 +96,9 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
         self.keyboardOffsetSpacing = 0.0;
         self.shouldKeyboardChangeFollowed = NO;
         
+        self.shouldDismissOnPanGesture = NO;
+        self.panDismissRatio = 0.5;
+        
         _isBeingShown = NO;
         _isShowing = NO;
         _isBeingDismissed = NO;
@@ -107,6 +111,12 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
         
         /// Register for notifications
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didChangeStatusbarOrientation:) name:UIApplicationDidChangeStatusBarFrameNotification object:nil];
+        
+        /// Set PanGesture
+        if (self.shouldDismissOnPanGesture) {
+              UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+            [self.containerView addGestureRecognizer:pan];
+        }
     }
     return self;
 }
@@ -198,12 +208,17 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
 }
 
 - (void)showAtCenterPoint:(CGPoint)point inView:(UIView *)view {
-    [self showAtCenterPoint:point inView:view duration:0.0];
+    [self showAtPositionPoint:point location:CGPointMake(0.5, 0.5) inView:view duration:0.0];
 }
 
-- (void)showAtCenterPoint:(CGPoint)point inView:(UIView *)view duration:(NSTimeInterval)duration {
+- (void)showAtPositionPoint:(CGPoint)point location:(CGPoint)location inView:(UIView *)view {
+    [self showAtPositionPoint:point location:location inView:view duration:0.0];
+}
+
+- (void)showAtPositionPoint:(CGPoint)point location:(CGPoint)location inView:(UIView *)view duration:(NSTimeInterval)duration {
     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    [parameters setValue:[NSValue valueWithCGPoint:point] forKey:kParametersCenterName];
+    [parameters setValue:[NSValue valueWithCGPoint:point] forKey:kParametersPositionName];
+    [parameters setValue:[NSValue valueWithCGPoint:location] forKey:kParametersContentLocationName];
     [parameters setValue:@(duration) forKey:kParametersDurationName];
     [parameters setValue:view forKey:kParametersViewName];
     [self showWithParameters:parameters.mutableCopy];
@@ -271,6 +286,9 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
                 backgroundAnimationBlock();
             }
             
+            /// Cache paramters
+            self.showParamters = [parameters mutableCopy];
+            
             /// Dismiss popup after duration. Default value is 0.0.
             NSNumber *durationNumber = parameters[kParametersDurationName];
             NSTimeInterval duration = durationNumber != nil ? durationNumber.doubleValue : 0.0;
@@ -319,15 +337,20 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
             UIViewAutoresizing containerAutoresizingMask = UIViewAutoresizingNone;
             
             /// Use explicit center coordinates if provided.
-            NSValue *centerValue = parameters[kParametersCenterName];
-            if (centerValue) {
-                CGPoint centerInView = centerValue.CGPointValue;
-                CGPoint centerInSelf;
+            NSValue *positionValue = parameters[kParametersPositionName];
+
+            if (positionValue) {
+                NSValue *contentLocationValue = parameters[kParametersContentLocationName];
+                CGPoint contentLocation = contentLocationValue.CGPointValue;
+                CGPoint positionInView = positionValue.CGPointValue;
+                CGPoint positionInSelf;
+                /// Set anchorPoint
+                strongSelf.containerView.layer.anchorPoint = contentLocation;
                 /// Convert coordinates from provided view to self.
                 UIView *fromView = parameters[kParametersViewName];
-                centerInSelf = fromView != nil ? [self convertPoint:centerInView toView:fromView] : centerInView;
-                finalContainerFrame.origin.x = centerInSelf.x - CGRectGetWidth(finalContainerFrame)*0.5;
-                finalContainerFrame.origin.y = centerInSelf.y - CGRectGetHeight(finalContainerFrame)*0.5;
+                positionInSelf = fromView != nil ? [self convertPoint:positionInView toView:fromView] : positionInView;
+                finalContainerFrame.origin.x = positionInSelf.x - CGRectGetWidth(finalContainerFrame)*contentLocation.x;
+                finalContainerFrame.origin.y = positionInSelf.y - CGRectGetHeight(finalContainerFrame)*contentLocation.y;
                 containerAutoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
             } else {
                 /// Otherwise use relative layout. Default value is center.
@@ -756,7 +779,6 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
     if (frameBegin.size.height > 0 && ABS(CGRectGetMinY(frameBegin) - CGRectGetMinY(frameEnd))) {
         CGRect frameConverted = [self convertRect:frameEnd fromView:nil];
         CGFloat keyboardHeightConverted = self.bounds.size.height - CGRectGetMinY(frameConverted);
-        NSLog(@"%f", keyboardHeightConverted);
         if (keyboardHeightConverted > 0) {
             _isKeyboardVisible = YES;
         
@@ -768,6 +790,123 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
                 self.containerView.center = newCenter;
             } completion:NULL];
         }
+    }
+}
+
+- (void)handlePan:(UIPanGestureRecognizer *)g {
+    if (_isKeyboardVisible || !self.shouldDismissOnPanGesture) return;
+    
+    /// Use explicit position coordinates if provided.
+    NSValue *positionValue = self.showParamters[kParametersPositionName];
+    if (positionValue) {
+        return;
+    }
+    
+    CGPoint p = [g translationInView:self];
+    
+    NSValue *layoutValue = self.showParamters[kParametersLayoutName];
+    FFPopupLayout layout = layoutValue ? [layoutValue FFPopupLayoutValue] : FFPopupLayout_Center;
+
+    switch (g.state) {
+        case UIGestureRecognizerStateBegan:
+            break;
+        case UIGestureRecognizerStateChanged: {
+            
+            
+            
+            
+//            switch (self.layoutType) {
+//                case zhPopupLayoutTypeTop: {
+//                    CGFloat boundary = g.view.bounds.size.height + self.offsetSpacing;
+//                    if ((CGRectGetMinY(g.view.frame) + g.view.bounds.size.height + p.y) < boundary) {
+//                        g.view.center = CGPointMake(g.view.center.x, g.view.center.y + p.y);
+//                    } else {
+//                        g.view.center = [self finalCenter];
+//                    }
+//                    self.maskView.alpha = CGRectGetMaxY(g.view.frame) / boundary;
+//                } break;
+//                case zhPopupLayoutTypeLeft: {
+//                    CGFloat boundary = g.view.bounds.size.width + self.offsetSpacing;
+//                    if ((CGRectGetMinX(g.view.frame) + g.view.bounds.size.width + p.x) < boundary) {
+//                        g.view.center = CGPointMake(g.view.center.x + p.x, g.view.center.y);
+//                    } else {
+//                        g.view.center = [self finalCenter];
+//                    }
+//                    self.maskView.alpha = CGRectGetMaxX(g.view.frame) / boundary;
+//                } break;
+//                case zhPopupLayoutTypeBottom: {
+//                    CGFloat boundary = self.maskView.bounds.size.height - g.view.bounds.size.height - self.offsetSpacing;
+//                    if ((g.view.frame.origin.y + p.y) > boundary) {
+//                        g.view.center = CGPointMake(g.view.center.x, g.view.center.y + p.y);
+//                    } else {
+//                        g.view.center = [self finalCenter];
+//                    }
+//                    self.maskView.alpha = 1 - (CGRectGetMinY(g.view.frame) - boundary) / (self.maskView.bounds.size.height - boundary);
+//                } break;
+//                case zhPopupLayoutTypeRight: {
+//                    CGFloat boundary = self.maskView.bounds.size.width - g.view.bounds.size.width - self.offsetSpacing;
+//                    if ((CGRectGetMinX(g.view.frame) + p.x) > boundary) {
+//                        g.view.center = CGPointMake(g.view.center.x + p.x, g.view.center.y);
+//                    } else {
+//                        g.view.center = [self finalCenter];
+//                    }
+//                    self.maskView.alpha = 1 - (CGRectGetMinX(g.view.frame) - boundary) / (self.maskView.bounds.size.width - boundary);
+//                } break;
+//                case zhPopupLayoutTypeCenter: {
+//                    [self directionalLock:p];
+//                    if (_directionalVertical) {
+//                        g.view.center = CGPointMake(g.view.center.x, g.view.center.y + p.y);
+//                        CGFloat boundary = self.maskView.bounds.size.height / 2 + self.offsetSpacing - g.view.bounds.size.height / 2;
+//                        self.maskView.alpha = 1 - (CGRectGetMinY(g.view.frame) - boundary) / (self.maskView.bounds.size.height - boundary);
+//                    } else {
+//                        [self directionalUnlock]; // todo...
+//                    }
+//                } break;
+//                default: break;
+//            }
+//
+//            [g setTranslation:CGPointZero inView:self.maskView];
+        } break;
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateFailed:
+        case UIGestureRecognizerStateEnded: {
+            
+//            BOOL isDismissNeeded = NO;
+//            switch (self.layoutType) {
+//                case zhPopupLayoutTypeTop: {
+//                    isDismissNeeded = CGRectGetMaxY(g.view.frame) < self.maskView.bounds.size.height * self.panDismissRatio;
+//                } break;
+//                case zhPopupLayoutTypeLeft: {
+//                    isDismissNeeded = CGRectGetMaxX(g.view.frame) < self.maskView.bounds.size.width * self.panDismissRatio;
+//                } break;
+//                case zhPopupLayoutTypeBottom: {
+//                    isDismissNeeded = CGRectGetMinY(g.view.frame) > self.maskView.bounds.size.height * self.panDismissRatio;
+//                } break;
+//                case zhPopupLayoutTypeRight: {
+//                    isDismissNeeded = CGRectGetMinX(g.view.frame) > self.maskView.bounds.size.width * self.panDismissRatio;
+//                } break;
+//                case zhPopupLayoutTypeCenter: {
+//                    if (_directionalVertical) {
+//                        isDismissNeeded = CGRectGetMinY(g.view.frame) > self.maskView.bounds.size.height * self.panDismissRatio;
+//                        [self directionalUnlock];
+//                    }
+//                } break;
+//                default: break;
+//            }
+//
+//            if (isDismissNeeded) {
+//                if (self.defaultDismissBlock) {
+//                    self.defaultDismissBlock(self);
+//                }
+//            } else {
+//                [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+//                    self.maskView.alpha = 1;
+//                    g.view.center = [self finalCenter];
+//                } completion:NULL];
+//            }
+            
+        } break;
+        default: break;
     }
 }
 

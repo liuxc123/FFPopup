@@ -30,11 +30,13 @@ class FFHomeViewController: UIViewController {
     }
     
     @objc fileprivate func showPopup() {
-        let popup = FFPopup(contentView: self.alertView, showType: .bounceIn, dismissType: .bounceOut, maskType: .dimmed, dismissOnBackgroundTouch: true, dismissOnContentTouch: false)
+        let popup = FFPopup(contentView: self.alertView, showType: .slideInFromBottom, dismissType: .slideOutToBottom, maskType: .dimmed, dismissOnBackgroundTouch: true, dismissOnContentTouch: false)
         popup.shouldKeyboardChangeFollowed = false
         popup.keyboardOffsetSpacing = 30
         popup.shouldDismissOnPanGesture = true
-        popup.show(position: view.center, location: CGPoint(x: 0, y: 0), inView: view)
+        popup.panDismissRatio = 0.5
+        
+        popup.show(layout: .init(horizontal: .leftOfCenter, vertical: .aboveCenter))
     }
     
     // MARK: Properties

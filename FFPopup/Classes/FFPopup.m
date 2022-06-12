@@ -90,9 +90,10 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
         self.showType = FFPopupShowType_BounceInFromTop;
         self.dismissType = FFPopupDismissType_BounceOutToBottom;
         self.maskType = FFPopupMaskType_Dimmed;
-        self.level = FFPopupLevel_Normal;
         self.dimmedMaskAlpha = 0.5;
-        
+        self.blurMaskEffectStyle = UIBlurEffectStyleDark;
+        self.level = FFPopupLevel_Normal;
+
         self.contentOffset = CGPointZero;
         self.keyboardOffsetSpacing = 10.0;
         self.shouldKeyboardChangeFollowed = NO;

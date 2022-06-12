@@ -154,7 +154,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
 Mask blur type effect style
 
-@discussion The default value is `UIBlurEffectStyleLight`.
+@discussion The default value is `UIBlurEffectStyleDark`.
 */
 @property (nonatomic, assign) UIBlurEffectStyle blurMaskEffectStyle;
 

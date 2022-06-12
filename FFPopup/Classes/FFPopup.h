@@ -84,7 +84,10 @@ typedef NS_ENUM(NSUInteger, FFPopupMaskType) {
     /// Don't allow interaction with underlying view.
     FFPopupMaskType_Clear NS_SWIFT_NAME(clear),
     /// Don't allow interaction with underlying view, dim background.
-    FFPopupMaskType_Dimmed NS_SWIFT_NAME(dimmed)
+    FFPopupMaskType_Dimmed NS_SWIFT_NAME(dimmed),
+    /// Don't allow interaction with underlying view, blur background.
+    FFPopupMaskType_Blur NS_SWIFT_NAME(blur),
+
 } NS_SWIFT_NAME(FFPopup.MaskType);
 
 /**
@@ -142,18 +145,25 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) FFPopupMaskType maskType;
 
 /**
- popup level
-
- @discussion The default value is `Normal`.
- */
-@property (nonatomic, assign) FFPopupLevel level;
-
-/**
  Overrides alpha value for dimmed mask.
  
  @discussion The default value is `0.5`.
  */
 @property (nonatomic, assign) CGFloat dimmedMaskAlpha;
+
+/**
+Mask blur type effect style
+
+@discussion The default value is `UIBlurEffectStyleLight`.
+*/
+@property (nonatomic, assign) UIBlurEffectStyle blurMaskEffectStyle;
+
+/**
+ popup level
+
+ @discussion The default value is `Normal`.
+ */
+@property (nonatomic, assign) FFPopupLevel level;
 
 /**
  Overrides animation duration for show in.

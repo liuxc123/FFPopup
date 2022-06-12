@@ -52,6 +52,7 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
 @interface FFPopup ()
 @property (nonatomic, strong) UIView *backgroundView;
 @property (nonatomic, strong) UIView *containerView;
+@property (nonatomic, strong) UIVisualEffectView *backgroundBlurView;
 @property (nonatomic, strong) NSDictionary *showParamters;
 @property (nonatomic, assign) CGRect finalContainerFrame;
 @property (nonatomic, assign) BOOL isShowing;
@@ -261,9 +262,17 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
             
             /// Setup background view
             strongSelf.backgroundView.alpha = 0.0;
-            if (strongSelf.maskType == FFPopupMaskType_Dimmed) {
+            [strongSelf.backgroundBlurView removeFromSuperview];
+  
+            if (strongSelf.maskType == FFPopupMaskType_Blur) {
+                strongSelf.backgroundView.backgroundColor = UIColor.clearColor;
+                [strongSelf.backgroundView addSubview:strongSelf.backgroundBlurView];
+                strongSelf.backgroundBlurView.effect = [UIBlurEffect effectWithStyle:self.blurMaskEffectStyle];
+            }
+            else if (strongSelf.maskType == FFPopupMaskType_Dimmed) {
                 strongSelf.backgroundView.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:strongSelf.dimmedMaskAlpha];
-            } else {
+            }
+            else {
                 strongSelf.backgroundView.backgroundColor = UIColor.clearColor;
             }
             
@@ -939,6 +948,16 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
         _backgroundView.frame = self.bounds;
     }
     return _backgroundView;
+}
+
+- (UIVisualEffectView *)backgroundBlurView {
+    if (!_backgroundBlurView) {
+        _backgroundBlurView = [UIVisualEffectView new];
+        _backgroundBlurView.userInteractionEnabled = NO;
+        _backgroundBlurView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        _backgroundBlurView.frame = self.bounds;
+    }
+    return _backgroundBlurView;
 }
 
 - (UIView *)containerView {

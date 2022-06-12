@@ -35,6 +35,8 @@ class FFHomeViewController: UIViewController {
         popup.keyboardOffsetSpacing = 30
         popup.shouldDismissOnPanGesture = true
         popup.panDismissRatio = 0.5
+        popup.blurMaskEffectStyle = .light
+        popup.dimmedMaskAlpha = 0.8
         popup.show(position: view.center, location: CGPoint(x: 0.5, y: 0.5), inView: view)
     }
     

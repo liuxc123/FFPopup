@@ -425,9 +425,9 @@ Create a new popup with custom values.
 
 This is the to-do list for the `FFPopup` project. You can join us to become a contributor.
 
-- [ ] Support blur option for background mask
-- [ ] Support for keyboard show/hide
-- [ ] Support for drag-to-dismiss
+- [x] Support blur option for background mask
+- [x] Support for keyboard show/hide
+- [x] Support for drag-to-dismiss
 
 See the [CONTRIBUTING](./CONTRIBUTING.md) file for contributing guidelines.
 

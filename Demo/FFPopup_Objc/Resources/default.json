@@ -55,6 +55,8 @@
         ],
 		"background": {"name": "Dismiss when background is touched", "enable": "1"},
 		"content": {"name": "Dismiss when content is touched", "enable": "0"},
-		"duration": {"name": "Duration for dismiss out", "enable": "0"}
+		"duration": {"name": "Duration for dismiss out", "enable": "0"},
+        "keyboard": {"name": "Keyboard change followed with content", "enable": "0"},
+        "panDismiss": {"name": "Dismiss when content is paned", "enable": "0"}
 	}
 }

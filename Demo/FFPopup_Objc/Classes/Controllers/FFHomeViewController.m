@@ -75,6 +75,8 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
     BOOL shouldDismissOnBackgroundTouch = YES;
     BOOL shouldDismissOnContentTouch = NO;
     BOOL shouldDismissOutAfterDuration = NO;
+    BOOL shouldKeyboardChangeFollowed = NO;
+    BOOL shouldDismissOnPanGesture = NO;
     
     ///Layout
     for (FFItemModel *item in _model.layout.firstObject.types) {
@@ -116,6 +118,10 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
     shouldDismissOnContentTouch = _model.content.enable;
     ///Whether dismiss popup after duration.
     shouldDismissOutAfterDuration = _model.duration.enable;
+    ///Whether keyboard change followed.
+    shouldKeyboardChangeFollowed = _model.keyboard.enable;
+    ///Whether dismiss popup on pan.
+    shouldDismissOnPanGesture = _model.panDismiss.enable;
     
     ///Configure popup & pop it.
     FFPopup *popup = [FFPopup popupWithContentView:self.contentView];
@@ -124,6 +130,8 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
     popup.maskType = maskType;
     popup.shouldDismissOnBackgroundTouch = shouldDismissOnBackgroundTouch;
     popup.shouldDismissOnContentTouch = shouldDismissOnContentTouch;
+    popup.shouldKeyboardChangeFollowed = shouldKeyboardChangeFollowed;
+    popup.shouldDismissOnPanGesture = shouldDismissOnPanGesture;
     [popup showWithLayout:layout duration:shouldDismissOutAfterDuration ? kDefaultDismissAfterDuration : 0.0];
 }
 
@@ -134,7 +142,7 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
 
 #pragma mark - UITableViewDataSource
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 6;
+    return 8;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -200,6 +208,18 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
             [cell updateTitle:itemModel.name selected:itemModel.enable];
             return cell;
         }   break;
+        case 6: {
+            FFActionItemModel *itemModel = _model.keyboard;
+            FFSelectionTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kFFSelectionTableViewCell];
+            [cell updateTitle:itemModel.name selected:itemModel.enable];
+            return cell;
+        }   break;
+        case 7: {
+              FFActionItemModel *itemModel = _model.panDismiss;
+              FFSelectionTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kFFSelectionTableViewCell];
+              [cell updateTitle:itemModel.name selected:itemModel.enable];
+              return cell;
+          }   break;
         default:
             return UITableViewCell.new;
             break;
@@ -231,6 +251,16 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
         }   break;
         case 5: {
             _model.duration.enable = !_model.duration.enable;
+            [_tableView reloadData];
+            return;
+        }   break;
+        case 6: {
+            _model.keyboard.enable = !_model.keyboard.enable;
+            [_tableView reloadData];
+            return;
+        }   break;
+        case 7: {
+            _model.panDismiss.enable = !_model.panDismiss.enable;
             [_tableView reloadData];
             return;
         }   break;
@@ -274,6 +304,12 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
         case 5:
             title = @"Duration";
             break;
+        case 6:
+            title = @"Keyboard";
+            break;
+        case 7:
+            title = @"PanDismiss";
+            break;
         default:
             break;
     }
@@ -313,7 +349,7 @@ static const CGFloat kDefaultDismissAfterDuration = 2.0;
     if (!_contentView) {
         CGFloat scale = 375.0 / K_SCREEN_WIDTH;
         CGFloat width = 320.0 * scale;
-        CGFloat height = 360.0 * scale;
+        CGFloat height = 410 * scale;
         _contentView = [[BLCustomContentView alloc] initWithFrame:CGRectMake(0, 0, width, height)];
         [_contentView updateTitle:@"👋\nHurray!" desc:@"Your request has been sent successfully. We will email you shortly. Meantime, check our marketing tips on Twitter and Facebook." buttonTitle:@"Got it"];
         _contentView.delegate = self;

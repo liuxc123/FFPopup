@@ -200,7 +200,7 @@ Will adjust view position when keyboard changes.
 /**
 Adjust the spacing between with the keyboard.
 
-@discussion The default value is `0.0`.
+@discussion The default value is `10.0`.
 */
 @property (nonatomic, assign) CGFloat keyboardOffsetSpacing;
 

@@ -12,6 +12,7 @@
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UILabel *descLabel;
+@property (nonatomic, strong) UITextField *textField;
 @property (nonatomic, strong) UIButton *closeButton;
 @end
 
@@ -38,6 +39,7 @@
     [self addSubview:self.contentView];
     [self.contentView addSubview:self.titleLabel];
     [self.contentView addSubview:self.descLabel];
+    [self.contentView addSubview:self.textField];
     [self.contentView addSubview:self.closeButton];
     /// Make Constraints
     [_contentView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -51,6 +53,12 @@
         make.top.equalTo(self.titleLabel.mas_bottom).offset(26.0);
         make.left.equalTo(self.contentView.mas_left).offset(20.0);
         make.right.equalTo(self.contentView.mas_right).offset(-20.0);
+    }];
+    [_textField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.descLabel.mas_bottom).offset(26.0);
+        make.left.equalTo(self.contentView.mas_left).offset(20.0);
+        make.right.equalTo(self.contentView.mas_right).offset(-20.0);
+        make.height.mas_equalTo(50.0);
     }];
     [_closeButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.bottom.equalTo(self.contentView.mas_bottom).offset(-18.0);
@@ -97,6 +105,16 @@
         _descLabel.textColor = [UIColor colorWithRed:84.0/255.0 green:92.0/255.0 blue:119.0/255.0 alpha:1.0];
     }
     return _descLabel;
+}
+
+- (UITextField *)textField {
+    if (!_textField) {
+        _textField = [UITextField new];
+        _textField.font = [UIFont systemFontOfSize:16.0];
+        _textField.textColor = [UIColor colorWithRed:84.0/255.0 green:92.0/255.0 blue:119.0/255.0 alpha:1.0];
+        _textField.placeholder = @"Please input something";
+    }
+    return _textField;
 }
 
 - (UIButton *)closeButton {

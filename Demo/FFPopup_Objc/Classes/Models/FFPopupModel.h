@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) FFActionItemModel *background;
 @property (nonatomic, strong) FFActionItemModel *content;
 @property (nonatomic, strong) FFActionItemModel *duration;
+@property (nonatomic, strong) FFActionItemModel *keyboard;
+@property (nonatomic, strong) FFActionItemModel *panDismiss;
 @end
 
 NS_ASSUME_NONNULL_END

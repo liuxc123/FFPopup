@@ -35,8 +35,7 @@ class FFHomeViewController: UIViewController {
         popup.keyboardOffsetSpacing = 30
         popup.shouldDismissOnPanGesture = true
         popup.panDismissRatio = 0.5
-        
-        popup.show(layout: .init(horizontal: .leftOfCenter, vertical: .aboveCenter))
+        popup.show(position: view.center, location: CGPoint(x: 0.5, y: 0.5), inView: view)
     }
     
     // MARK: Properties

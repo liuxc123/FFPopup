@@ -93,7 +93,7 @@ const FFPopupLayout FFPopupLayout_Center = { FFPopupHorizontalLayout_Center, FFP
         self.dimmedMaskAlpha = 0.5;
         
         self.contentOffset = CGPointZero;
-        self.keyboardOffsetSpacing = 0.0;
+        self.keyboardOffsetSpacing = 10.0;
         self.shouldKeyboardChangeFollowed = NO;
         
         self.shouldDismissOnPanGesture = NO;

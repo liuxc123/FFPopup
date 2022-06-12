@@ -88,7 +88,7 @@
 	- [x] Allow interaction with underlying view
 	- [x] Don't allow interaction with underlying view
 	- [x] Don't allow interaction with underlying view, dim background
-	- [ ] Don't allow interaction with underlying view, blur background
+	- [x] Don't allow interaction with underlying view, blur background
 	- [ ] Support custom
 
 - Others
